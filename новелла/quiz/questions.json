@@ -1,0 +1,81 @@
+{
+  "questions": [
+    {
+      "question": "Что такое HTML?",
+      "answers": [
+        {"text": "Язык разметки гипертекста", "correct": true},
+        {"text": "Язык программирования", "correct": false},
+        {"text": "Графический формат", "correct": false},
+        {"text": "База данных", "correct": false},
+        {"text": "Фреймворк", "correct": false},
+        {"text": "Операционная система", "correct": false}
+      ]
+    },
+    {
+      "question": "Какой язык используется для стилизации веб-страниц?",
+      "answers": [
+        {"text": "CSS", "correct": true},
+        {"text": "JavaScript", "correct": false},
+        {"text": "PHP", "correct": false},
+        {"text": "Python", "correct": false},
+        {"text": "Ruby", "correct": false},
+        {"text": "Java", "correct": false}
+      ]
+    },
+    {
+      "question": "Какой язык используется для создания динамических веб-страниц?",
+      "answers": [
+        {"text": "JavaScript", "correct": true},
+        {"text": "HTML", "correct": false},
+        {"text": "CSS", "correct": false},
+        {"text": "PHP", "correct": false},
+        {"text": "SQL", "correct": false},
+        {"text": "C++", "correct": false}
+      ]
+    },
+    {
+      "question": "Что такое PHP?",
+      "answers": [
+        {"text": "Серверный язык программирования", "correct": true},
+        {"text": "Клиентский язык программирования", "correct": false},
+        {"text": "Язык разметки", "correct": false},
+        {"text": "Язык запросов", "correct": false},
+        {"text": "Язык стилей", "correct": false},
+        {"text": "Язык баз данных", "correct": false}
+      ]
+    },
+    {
+      "question": "Какой фреймворк поддерживает написание команд на языке PHP?",
+      "answers": [
+        {"text": "Laravel", "correct": true},
+        {"text": "pythone", "correct": false},
+        {"text": "Angular", "correct": false},
+        {"text": "Vue.js", "correct": false},
+        {"text": "Django", "correct": false},
+        {"text": "Flask", "correct": false}
+      ]
+    },
+    {
+      "question": "Что такое SQL?",
+      "answers": [
+        {"text": "Язык структурированных запросов", "correct": true},
+        {"text": "Язык программирования", "correct": false},
+        {"text": "Язык разметки", "correct": false},
+        {"text": "Язык стилей", "correct": false},
+        {"text": "Язык баз данных", "correct": false},
+        {"text": "Язык запросов", "correct": false}
+      ]
+    },
+    {
+      "question": "Какой язык чаще всего используется для создания серверной части  приложения?",
+      "answers": [
+        {"text": "Node.js", "correct": true},
+        {"text": "HTML", "correct": false},
+        {"text": "CSS", "correct": false},
+        {"text": "С", "correct": false},
+        {"text": "SQL", "correct": false},
+        {"text": "C++", "correct": false}
+      ]
+    }
+  ]
+}

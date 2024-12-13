@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мессенджер с каналами</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Добро пожаловать, {{ current_user.username }}!</h2>
+            <a href="{{ url_for('logout') }}">Выйти</a>
+        </div>
+        <div class="channels">
+            <h2>Публичные каналы</h2>
+            <ul id="public-channel-list">
+                {% for channel in public_channels %}
+                <li data-channel-name="{{ channel.name }}">{{ channel.name }}</li>
+                {% endfor %}
+            </ul>
+            <button id="create-public-channel">Создать публичный канал</button>
+            <h2>Приватные каналы</h2>
+            <ul id="private-channel-list">
+                {% for channel in private_channels %}
+                <li data-channel-name="{{ channel.name }}">{{ channel.name }}</li>
+                {% endfor %}
+            </ul>
+            <button id="create-channel">Создать приватный канал</button>
+        </div>
+        <div class="chat">
+            <h2 id="channel-name">Выберите канал</h2>
+            <div id="messages">
+                <!-- Сообщения будут добавляться динамически -->
+            </div>
+            <input type="text" id="message-input" placeholder="Введите сообщение">
+            <button id="send-message">Отправить</button>
+        </div>
+        <div class="users">
+            <h2>Пользователи</h2>
+            <ul id="user-list">
+                {% for user in users %}
+                <li>
+                    <span>{{ user.username }}</span>
+                    <button class="invite-button" data-user-id="{{ user.id }}">Пригласить в чат</button>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

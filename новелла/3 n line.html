@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3 в ряд (Квадраты)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            font-size: 24px;
+            color: #333;
+            background-color: #fff;
+        }
+
+        .dragging {
+            opacity: 0.5;
+        }
+
+        #score {
+            margin-top: 20px;
+            font-size: 24px;
+        }
+
+        #game-over-message {
+            margin-top: 20px;
+            font-size: 24px;
+            color: red;
+            display: none;
+        }
+
+        #new-game-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>3 в ряд (Квадраты)</h1>
+    <div id="game-over-message">Игра окончена!</div>
+    <table id="game-board"></table>
+    <div id="score">Очки: 0</div>
+    <button id="new-game-button">Новая Игра</button>
+    <script>
+        const boardSize = 5;
+        const colors = ['red', 'green', 'blue', 'yellow', 'purple'];
+        let score = 0;
+        let draggedCell = null;
+        let gameOver = false;
+
+        function createBoard() {
+            const board = document.getElementById('game-board');
+            board.innerHTML = '';
+            for (let i = 0; i < boardSize; i++) {
+                const row = document.createElement('tr');
+                for (let j = 0; j < boardSize; j++) {
+                    const cell = document.createElement('td');
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.style.backgroundColor = '';
+                    cell.addEventListener('dragstart', handleDragStart);
+                    cell.addEventListener('dragover', handleDragOver);
+                    cell.addEventListener('drop', handleDrop);
+                    cell.addEventListener('dragenter', handleDragEnter);
+                    cell.addEventListener('dragleave', handleDragLeave);
+                    cell.addEventListener('dragend', handleDragEnd);
+                    row.appendChild(cell);
+                }
+                board.appendChild(row);
+            }
+            addNewCells();
+        }
+
+        function handleDragStart(event) {
+            if (event.target.style.backgroundColor === '') return;
+            resetDragStyles();
+            draggedCell = event.target;
+            draggedCell.classList.add('dragging');
+            event.dataTransfer.setData('text/plain', '');
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+        }
+
+        function handleDrop(event) {
+            if (gameOver) return;
+            const targetCell = event.target;
+            if (targetCell === draggedCell) return;
+            if (targetCell.style.backgroundColor !== '') return;
+            if (!canMove(draggedCell, targetCell)) return;
+
+            // Swap colors
+            const tempColor = draggedCell.style.backgroundColor;
+            draggedCell.style.backgroundColor = targetCell.style.backgroundColor;
+            targetCell.style.backgroundColor = tempColor;
+
+            // Check for matches
+            checkMatches();
+            addNewCells();
+        }
+
+        function handleDragEnter(event) {
+            if (event.target.style.backgroundColor === '') {
+                event.target.style.border = '2px dashed #000';
+            }
+        }
+
+        function handleDragLeave(event) {
+            event.target.style.border = '';
+        }
+
+        function handleDragEnd(event) {
+            resetDragStyles();
+        }
+
+        function resetDragStyles() {
+            const cells = document.querySelectorAll('#game-board td');
+            cells.forEach(cell => {
+                cell.classList.remove('dragging');
+                cell.style.border = '';
+            });
+        }
+
+        function canMove(fromCell, toCell) {
+            const fromRow = parseInt(fromCell.dataset.row);
+            const fromCol = parseInt(fromCell.dataset.col);
+            const toRow = parseInt(toCell.dataset.row);
+            const toCol = parseInt(toCell.dataset.col);
+
+            if (fromRow === toRow) { // Horizontal move
+                const direction = toCol > fromCol ? 1 : -1;
+                for (let col = fromCol + direction; col !== toCol; col += direction) {
+                    const cell = document.querySelector(`[data-row="${fromRow}"][data-col="${col}"]`);
+                    if (cell.style.backgroundColor !== '') {
+                        return false;
+                    }
+                }
+                return true;
+            } else if (fromCol === toCol) { // Vertical move
+                const direction = toRow > fromRow ? 1 : -1;
+                for (let row = fromRow + direction; row !== toRow; row += direction) {
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${fromCol}"]`);
+                    if (cell.style.backgroundColor !== '') {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false; // Diagonal moves not allowed
+        }
+
+        function checkMatches() {
+            const board = document.getElementById('game-board');
+            const cells = board.getElementsByTagName('td');
+            const rows = Array.from(cells).reduce((acc, cell) => {
+                const row = cell.dataset.row;
+                const col = cell.dataset.col;
+                if (!acc[row]) acc[row] = {};
+                acc[row][col] = cell;
+                return acc;
+            }, {});
+
+            let matchFound = false;
+
+            // Check rows
+            for (let row in rows) {
+                for (let col = 0; col < boardSize - 2; col++) {
+                    const color1 = rows[row][col].style.backgroundColor;
+                    const color2 = rows[row][col+1].style.backgroundColor;
+                    const color3 = rows[row][col+2].style.backgroundColor;
+                    if (color1 && color1 === color2 && color2 === color3) {
+                        rows[row][col].style.backgroundColor = '';
+                        rows[row][col+1].style.backgroundColor = '';
+                        rows[row][col+2].style.backgroundColor = '';
+                        matchFound = true;
+                    }
+                }
+            }
+
+            // Check columns
+            for (let col = 0; col < boardSize; col++) {
+                for (let row = 0; row < boardSize - 2; row++) {
+                    const color1 = rows[row][col].style.backgroundColor;
+                    const color2 = rows[row+1][col].style.backgroundColor;
+                    const color3 = rows[row+2][col].style.backgroundColor;
+                    if (color1 && color1 === color2 && color2 === color3) {
+                        rows[row][col].style.backgroundColor = '';
+                        rows[row+1][col].style.backgroundColor = '';
+                        rows[row+2][col].style.backgroundColor = '';
+                        matchFound = true;
+                    }
+                }
+            }
+
+            if (matchFound) {
+                score += 3;
+                document.getElementById('score').textContent = `Очки: ${score}`;
+                checkMatches();
+            }
+            return matchFound;
+        }
+
+        function addNewCells() {
+            const board = document.getElementById('game-board');
+            const cells = board.getElementsByTagName('td');
+            const emptyCells = Array.from(cells).filter(cell => cell.style.backgroundColor === '');
+            if (emptyCells.length < 2) {
+                if (emptyCells.length === 0) {
+                    gameOver = true;
+                    showGameOverMessage();
+                } else {
+                    // Attempt to add one cell if only one empty cell is left
+                    if (emptyCells.length === 1) {
+                        emptyCells[0].style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        checkMatches();
+                    }
+                    // Check if no matches can be made
+                    if (!checkMatches()) {
+                        gameOver = true;
+                        showGameOverMessage();
+                    }
+                }
+                return;
+            }
+            for (let i = 0; i < 2; i++) {
+                const randomIndex = Math.floor(Math.random() * emptyCells.length);
+                const cell = emptyCells[randomIndex];
+                cell.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                emptyCells.splice(randomIndex, 1);
+            }
+            checkMatches();
+        }
+
+        function showGameOverMessage() {
+            document.getElementById('game-over-message').style.display = 'block';
+        }
+
+        function resetGame() {
+            score = 0;
+            document.getElementById('score').textContent = `Очки: ${score}`;
+            createBoard();
+            gameOver = false;
+            document.getElementById('game-over-message').style.display = 'none';
+        }
+
+        // Add event listener to the "New Game" button
+        document.getElementById('new-game-button').addEventListener('click', resetGame);
+
+        createBoard();
+    </script>
+</body>
+</html>

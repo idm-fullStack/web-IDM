@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3 в ряд (Квадраты)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        td {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            font-size: 24px;
+            color: #333;
+            background-color: #fff;
+        }
+
+        .selected {
+            background-color: #ffcc00;
+        }
+
+        #score {
+            margin-top: 20px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <h1>3 в ряд (Квадраты)</h1>
+    <table id="game-board"></table>
+    <div id="score">Очки: 0</div>
+    <script>
+        const boardSize = 5;
+        const colors = ['red', 'green', 'blue', 'yellow', 'purple'];
+        let score = 0;
+        let selectedCell = null;
+
+        function createBoard() {
+            const board = document.getElementById('game-board');
+            board.innerHTML = '';
+            for (let i = 0; i < boardSize; i++) {
+                const row = document.createElement('tr');
+                for (let j = 0; j < boardSize; j++) {
+                    const cell = document.createElement('td');
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.style.backgroundColor = '';
+                    cell.addEventListener('click', handleCellClick);
+                    row.appendChild(cell);
+                }
+                board.appendChild(row);
+            }
+        }
+
+        function handleCellClick(event) {
+            const cell = event.target;
+            if (selectedCell) {
+                if (selectedCell !== cell && canMove(selectedCell, cell)) {
+                    moveCell(selectedCell, cell);
+                    selectedCell.classList.remove('selected');
+                    selectedCell = null;
+                    checkMatches();
+                    addNewCells(); // Добавляем новые клетки после хода игрока
+                }
+            } else {
+                selectedCell = cell;
+                cell.classList.add('selected');
+            }
+        }
+
+        function canMove(fromCell, toCell) {
+            const fromRow = parseInt(fromCell.dataset.row);
+            const fromCol = parseInt(fromCell.dataset.col);
+            const toRow = parseInt(toCell.dataset.row);
+            const toCol = parseInt(toCell.dataset.col);
+
+            if (fromRow === toRow) {
+                // Движение по горизонтали
+                const minCol = Math.min(fromCol, toCol);
+                const maxCol = Math.max(fromCol, toCol);
+                for (let col = minCol + 1; col < maxCol; col++) {
+                    if (document.querySelector(`[data-row="${fromRow}"][data-col="${col}"]`).style.backgroundColor) {
+                        return false;
+                    }
+                }
+                return true;
+            } else if (fromCol === toCol) {
+                // Движение по вертикали
+                const minRow = Math.min(fromRow, toRow);
+                const maxRow = Math.max(fromRow, toRow);
+                for (let row = minRow + 1; row < maxRow; row++) {
+                    if (document.querySelector(`[data-row="${row}"][data-col="${fromCol}"]`).style.backgroundColor) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        function moveCell(fromCell, toCell) {
+            toCell.style.backgroundColor = fromCell.style.backgroundColor;
+            fromCell.style.backgroundColor = '';
+        }
+
+        function checkMatches() {
+            const board = document.getElementById('game-board');
+            const cells = board.getElementsByTagName('td');
+            const rows = Array.from(cells).reduce((acc, cell) => {
+                const row = cell.dataset.row;
+                const col = cell.dataset.col;
+                if (!acc[row]) acc[row] = {};
+                acc[row][col] = cell;
+                return acc;
+            }, {});
+
+            let matchFound = false;
+
+            // Проверка по строкам
+            for (let row in rows) {
+                for (let col = 0; col < boardSize - 2; col++) {
+                    const color1 = rows[row][col].style.backgroundColor;
+                    const color2 = rows[row][parseInt(col) + 1].style.backgroundColor;
+                    const color3 = rows[row][parseInt(col) + 2].style.backgroundColor;
+                    if (color1 && color1 === color2 && color2 === color3) {
+                        rows[row][col].style.backgroundColor = '';
+                        rows[row][parseInt(col) + 1].style.backgroundColor = '';
+                        rows[row][parseInt(col) + 2].style.backgroundColor = '';
+                        matchFound = true;
+                    }
+                }
+            }
+
+            // Проверка по столбцам
+            for (let col = 0; col < boardSize; col++) {
+                for (let row = 0; row < boardSize - 2; row++) {
+                    const color1 = rows[row][col].style.backgroundColor;
+                    const color2 = rows[parseInt(row) + 1][col].style.backgroundColor;
+                    const color3 = rows[parseInt(row) + 2][col].style.backgroundColor;
+                    if (color1 && color1 === color2 && color2 === color3) {
+                        rows[row][col].style.backgroundColor = '';
+                        rows[parseInt(row) + 1][col].style.backgroundColor = '';
+                        rows[parseInt(row) + 2][col].style.backgroundColor = '';
+                        matchFound = true;
+                    }
+                }
+            }
+
+            if (matchFound) {
+                score += 1;
+                document.getElementById('score').textContent = `Очки: ${score}`;
+                checkMatches(); // Рекурсивно проверяем, есть ли еще совпадения
+            }
+        }
+
+        function addNewCells() {
+            const board = document.getElementById('game-board');
+            const cells = board.getElementsByTagName('td');
+            let emptyCells = Array.from(cells).filter(cell => cell.style.backgroundColor === '');
+
+            if (emptyCells.length === 0) {
+                alert('Игра окончена!');
+                return;
+            }
+
+            for (let i = 0; i < 2 && emptyCells.length > 0; i++) {
+                const randomIndex = Math.floor(Math.random() * emptyCells.length);
+                const cell = emptyCells[randomIndex];
+                cell.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                emptyCells.splice(randomIndex, 1);
+            }
+
+            checkMatches(); // Проверяем совпадения после добавления новых клеток
+        }
+
+        createBoard();
+        addNewCells();
+    </script>
+</body>
+</html>
